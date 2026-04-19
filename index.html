@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECG & Cardiology Study Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #e63946;
+    --accent2: #f4a261;
+    --accent3: #2ec4b6;
+    --text: #e8eaf0;
+    --text-dim: #8899aa;
+    --text-muted: #445566;
+    --gold: #d4af37;
+    --pulse: #e63946;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ECG Line Background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(230,57,70,0.04) 40px),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(230,57,70,0.04) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .ecg-animation {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    width: 200%;
+    height: 80px;
+    opacity: 0.35;
+  }
+
+  .ecg-animation svg {
+    width: 50%;
+    height: 100%;
+    animation: ecg-scroll 4s linear infinite;
+  }
+
+  .ecg-animation svg:last-child {
+    animation-delay: -2s;
+  }
+
+  @keyframes ecg-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(230,57,70,0.12);
+    border: 1px solid rgba(230,57,70,0.3);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    animation: fade-in 0.8s ease;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    animation: slide-up 0.9s ease;
+  }
+
+  .hero-title .line2 {
+    color: var(--accent);
+    display: block;
+  }
+
+  .hero-sub {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    max-width: 520px;
+    margin-bottom: 3rem;
+    animation: slide-up 1s ease;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: slide-up 1.1s ease;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* NAV */
+  .top-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,15,30,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    overflow-x: auto;
+  }
+
+  .nav-inner {
+    display: flex;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-width: max-content;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 1rem 1.2rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: rgba(230,57,70,0.1);
+    border: 1px solid rgba(230,57,70,0.2);
+    padding: 4px 10px;
+    border-radius: 2px;
+    min-width: fit-content;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* TOPIC CARDS */
+  .topic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .topic-card:hover {
+    border-color: rgba(230,57,70,0.3);
+  }
+
+  .topic-header {
+    background: var(--surface2);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .topic-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(230,57,70,0.12);
+    border: 1px solid rgba(230,57,70,0.25);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .topic-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .topic-body {
+    padding: 1.5rem;
+  }
+
+  /* SUBSECTIONS */
+  .subsection {
+    margin-bottom: 1.5rem;
+  }
+
+  .subsection:last-child { margin-bottom: 0; }
+
+  .sub-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sub-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .sub-content {
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* LISTS */
+  .info-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .info-list li {
+    padding: 5px 0 5px 1.2rem;
+    position: relative;
+    color: var(--text-dim);
+  }
+
+  .info-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.7rem;
+    top: 8px;
+  }
+
+  .info-list li strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ECG FEATURE BOXES */
+  .ecg-box {
+    background: rgba(46,196,182,0.05);
+    border: 1px solid rgba(46,196,182,0.2);
+    border-left: 3px solid var(--accent3);
+    border-radius: 0 4px 4px 0;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+  }
+
+  .ecg-box .box-title {
+    color: var(--accent3);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+  }
+
+  /* TABLES */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 1rem 0;
+  }
+
+  .data-table th {
+    background: var(--surface2);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    vertical-align: top;
+  }
+
+  .data-table tr:hover td {
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+  }
+
+  /* HIGHLIGHT BOXES */
+  .highlight-box {
+    background: rgba(230,57,70,0.06);
+    border: 1px solid rgba(230,57,70,0.18);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+  }
+
+  .highlight-box .hb-title {
+    color: var(--accent);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-box {
+    background: rgba(244,162,97,0.06);
+    border: 1px solid rgba(244,162,97,0.2);
+    border-radius: 4px;
+    padding: 1rem 1.2rem;
+    margin: 1rem 0;
+  }
+
+  .warning-box .hb-title {
+    color: var(--accent2);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Q&A SHORT ANSWERS */
+  .qa-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .qa-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .qa-item:hover {
+    border-color: rgba(230,57,70,0.3);
+    transform: translateY(-2px);
+  }
+
+  .qa-q {
+    background: var(--surface2);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .qa-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: rgba(230,57,70,0.1);
+    padding: 3px 8px;
+    border-radius: 2px;
+    min-width: 38px;
+    text-align: center;
+    margin-top: 1px;
+  }
+
+  .qa-question {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+
+  .qa-a {
+    padding: 1rem 1.5rem;
+  }
+
+  .qa-answer {
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  .qa-answer strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    background: rgba(46,196,182,0.1);
+    border: 1px solid rgba(46,196,182,0.25);
+    color: var(--accent3);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin: 2px;
+  }
+
+  .tag.red {
+    background: rgba(230,57,70,0.1);
+    border-color: rgba(230,57,70,0.25);
+    color: var(--accent);
+  }
+
+  .tag.gold {
+    background: rgba(212,175,55,0.1);
+    border-color: rgba(212,175,55,0.25);
+    color: var(--gold);
+  }
+
+  /* FORMULA */
+  .formula {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    background: rgba(46,196,182,0.07);
+    border: 1px solid rgba(46,196,182,0.2);
+    padding: 8px 14px;
+    border-radius: 4px;
+    display: inline-block;
+    color: var(--accent3);
+    margin: 6px 0;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 2rem 0;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCROLL TO TOP */
+  .scroll-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 99;
+  }
+
+  .scroll-top.visible { opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .hero-stats { gap: 1.5rem; }
+    .top-nav { font-size: 0.75rem; }
+    .section-title { font-size: 1.4rem; }
+    main { padding: 2rem 1rem; }
+    .data-table { font-size: 0.78rem; }
+    .data-table th, .data-table td { padding: 7px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">📋 Cardiology Study Guide</div>
+  <h1 class="hero-title">
+    ECG & Cardiac
+    <span class="line2">Abnormalities</span>
+  </h1>
+  <p class="hero-sub">A comprehensive exam-oriented reference covering atrial, ventricular, conduction, electrolyte, and metabolic cardiac topics.</p>
+  <div class="hero-stats">
+    <div class="stat">
+      <span class="stat-num">7</span>
+      <span class="stat-label">Major Sections</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">17</span>
+      <span class="stat-label">Topics Covered</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">44</span>
+      <span class="stat-label">Q&A Answers</span>
+    </div>
+  </div>
+
+  <!-- ECG Animation -->
+  <div class="ecg-animation">
+    <svg viewBox="0 0 600 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,40 60,40 80,40 90,5 100,75 110,20 120,60 130,40 200,40 210,40 220,5 230,75 240,20 250,60 260,40 330,40 340,40 350,5 360,75 370,20 380,60 390,40 460,40 470,40 480,5 490,75 500,20 510,60 520,40 600,40"
+        stroke="#e63946" stroke-width="1.5" fill="none"/>
+    </svg>
+    <svg viewBox="0 0 600 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polyline points="0,40 60,40 80,40 90,5 100,75 110,20 120,60 130,40 200,40 210,40 220,5 230,75 240,20 250,60 260,40 330,40 340,40 350,5 360,75 370,20 380,60 390,40 460,40 470,40 480,5 490,75 500,20 510,60 520,40 600,40"
+        stroke="#e63946" stroke-width="1.5" fill="none"/>
+    </svg>
+  </div>
+</section>
+
+<!-- STICKY NAV -->
+<nav class="top-nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="#atrial"><span class="nav-dot"></span>Atrial Abnormalities</a>
+    <a class="nav-link" href="#lvh"><span class="nav-dot"></span>LVH</a>
+    <a class="nav-link" href="#lve"><span class="nav-dot"></span>LVE</a>
+    <a class="nav-link" href="#rvh"><span class="nav-dot"></span>RVH</a>
+    <a class="nav-link" href="#rve"><span class="nav-dot"></span>RVE</a>
+    <a class="nav-link" href="#avblock"><span class="nav-dot"></span>AV Blocks</a>
+    <a class="nav-link" href="#bbb"><span class="nav-dot"></span>Bundle Branch Blocks</a>
+    <a class="nav-link" href="#electrolytes"><span class="nav-dot"></span>Electrolytes</a>
+    <a class="nav-link" href="#metabolic"><span class="nav-dot"></span>Metabolic</a>
+    <a class="nav-link" href="#shortqa"><span class="nav-dot"></span>Short Q&A</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ===== SECTION 1: ATRIAL ABNORMALITIES ===== -->
+  <section class="section" id="atrial">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Atrial Abnormalities</h2>
+    </div>
+
+    <!-- LAA -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">🫀</div>
+        <div class="topic-title">Left Atrial Abnormalities (LAA)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Introduction & Definition</div>
+          <p class="sub-content">Left atrial abnormalities refer to structural and electrical changes in the left atrium, commonly due to pressure or volume overload. They are frequently detected on ECG and echocardiography. <strong>Definition:</strong> Enlargement and/or delayed activation of the left atrium, usually secondary to chronic cardiac conditions.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Pressure overload:</strong> Mitral stenosis, Systemic hypertension, Aortic stenosis</li>
+            <li><strong>Volume overload:</strong> Mitral regurgitation, Left ventricular failure</li>
+            <li><strong>Other:</strong> Atrial fibrillation, Cardiomyopathy, Ischemic heart disease</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Types</div>
+          <ul class="info-list">
+            <li>Left Atrial Enlargement (LAE)</li>
+            <li>Left Atrial Abnormality (Electrical changes without gross enlargement)</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>P mitrale</strong> — broad, notched P wave</li>
+            <li>P wave duration <strong>&gt; 120 ms</strong></li>
+            <li>Notched P wave in <strong>Lead II</strong></li>
+            <li><strong>Biphasic P wave in V1</strong> — deep negative terminal component</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Echocardiographic Findings</div>
+          <ul class="info-list">
+            <li>Increased LA diameter (&gt;40 mm in adults)</li>
+            <li>Increased LA volume index (&gt;34 mL/m²)</li>
+            <li>Dilated LA chamber</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li>Risk of atrial fibrillation</li>
+            <li>Risk of thromboembolism (stroke)</li>
+            <li>Marker of chronic cardiac disease</li>
+            <li>Indicates diastolic dysfunction</li>
+            <li>Strong predictor of cardiovascular morbidity</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAA -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">🫀</div>
+        <div class="topic-title">Right Atrial Abnormalities (RAA)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Introduction & Definition</div>
+          <p class="sub-content">Right atrial abnormalities occur due to conditions causing increased pressure or volume in the right atrium. <strong>Definition:</strong> Enlargement or hypertrophy of the right atrium, affecting electrical activity and cardiac function.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Pressure overload:</strong> Pulmonary hypertension, Pulmonary stenosis</li>
+            <li><strong>Volume overload:</strong> Tricuspid regurgitation, ASD</li>
+            <li><strong>Other:</strong> Chronic lung disease (Cor pulmonale), Congenital heart diseases</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Types</div>
+          <ul class="info-list">
+            <li>Right Atrial Enlargement (RAE)</li>
+            <li>Right Atrial Hypertrophy (rare, usually enlargement predominates)</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>P pulmonale</strong> — tall peaked P wave</li>
+            <li>P wave amplitude <strong>&gt; 2.5 mm in Lead II</strong></li>
+            <li>Tall P waves in inferior leads (II, III, aVF)</li>
+            <li>Positive peaked P wave in V1</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Echocardiographic Findings</div>
+          <ul class="info-list">
+            <li>Enlarged RA area (&gt;18 cm²)</li>
+            <li>Dilated right atrium</li>
+            <li>Associated RV enlargement</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li>Indicates pulmonary or right heart disease</li>
+            <li>Associated with right heart failure</li>
+            <li>May lead to arrhythmias</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+        <div class="sub-label">Key Differences: LAA vs RAA</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>Left Atrial Abnormality</th><th>Right Atrial Abnormality</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>ECG P wave</td><td>Broad, notched (P mitrale)</td><td>Tall, peaked (P pulmonale)</td></tr>
+            <tr><td>Cause</td><td>Left heart disease</td><td>Lung/right heart disease</td></tr>
+            <tr><td>Lead II</td><td>Wide P wave</td><td>Tall P wave</td></tr>
+            <tr><td>V1</td><td>Biphasic (deep negative)</td><td>Tall positive</td></tr>
+            <tr><td>Common disease</td><td>Mitral valve disease</td><td>Pulmonary hypertension</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 2: LVH ===== -->
+  <section class="section" id="lvh">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Left Ventricular Hypertrophy (LVH)</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">💪</div>
+        <div class="topic-title">LVH — Definition, Causes, ECG, Treatment & Significance</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Increase in the muscle mass and wall thickness of the left ventricle due to chronic pressure or volume overload.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Pressure overload (most common):</strong> Systemic hypertension ⭐, Aortic stenosis, Coarctation of aorta</li>
+            <li><strong>Volume overload:</strong> Aortic regurgitation, Mitral regurgitation</li>
+            <li><strong>Other:</strong> Hypertrophic cardiomyopathy, Athletic heart (physiological), Chronic kidney disease</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features (Very Important)</div>
+          <ul class="info-list">
+            <li><strong>1. Sokolow–Lyon Criteria:</strong> <span class="formula">S(V1) + R(V5/V6) ≥ 35 mm</span></li>
+            <li><strong>2. Other voltage:</strong> R in V5 or V6 ≥ 25 mm; R in aVL ≥ 11 mm</li>
+            <li><strong>3. Left Axis Deviation (LAD):</strong> QRS axis −30° to −90°</li>
+            <li><strong>4. ST-T Strain pattern:</strong> ST depression + T wave inversion in I, aVL, V5, V6</li>
+            <li><strong>5. QRS changes:</strong> Slightly prolonged; delayed intrinsicoid deflection in V5/V6 (&gt;50 ms)</li>
+            <li><strong>6. Left Atrial Enlargement (associated):</strong> Broad, notched P wave</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Treat underlying cause:</strong> Hypertension → ACE inhibitors/ARBs/beta-blockers; Aortic stenosis → Valve replacement</li>
+            <li><strong>Medical:</strong> ACE inhibitors/ARBs (reduce remodeling), Beta-blockers (reduce workload), Diuretics</li>
+            <li><strong>Lifestyle:</strong> Salt restriction, Weight control, Moderate exercise</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li>Predictor of cardiovascular morbidity and mortality</li>
+            <li>Leads to: Diastolic dysfunction, Heart failure, Arrhythmias (ventricular)</li>
+            <li>Risk of: Myocardial ischemia, Sudden cardiac death</li>
+            <li><em>ECG is screening; Echo is gold standard (confirmatory)</em></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 3: LVE ===== -->
+  <section class="section" id="lve">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Left Ventricular Enlargement (LVE)</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">🔴</div>
+        <div class="topic-title">LVE — Definition, Causes, ECG, Treatment & Significance</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Dilatation of the left ventricular cavity, often associated with increased volume load and sometimes with hypertrophy.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Volume overload (most common):</strong> Aortic regurgitation ⭐, Mitral regurgitation, VSD</li>
+            <li><strong>Pressure overload (chronic):</strong> Systemic hypertension, Aortic stenosis</li>
+            <li><strong>Myocardial diseases:</strong> Dilated cardiomyopathy, Ischemic heart disease (post-MI)</li>
+            <li><strong>Other:</strong> Chronic anemia, Athletic heart</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features (In Detail)</div>
+          <ul class="info-list">
+            <li><strong>1. Sokolow–Lyon Criteria:</strong> <span class="formula">S(V1) + R(V5/V6) ≥ 35 mm</span></li>
+            <li><strong>2. Left Axis Deviation</strong></li>
+            <li><strong>3. QRS:</strong> Slight widening; delayed intrinsicoid deflection V5/V6 (&gt;50 ms)</li>
+            <li><strong>4. ST-T Strain:</strong> ST depression in I, aVL, V5, V6; T wave inversion</li>
+            <li><strong>5. Associated LAE:</strong> Broad, notched P waves</li>
+            <li><strong>6. Poor R wave progression</strong> (especially dilated cardiomyopathy)</li>
+            <li><strong>7. Possible arrhythmias:</strong> Ventricular ectopics, AF</li>
+          </ul>
+        </div>
+        <div class="warning-box">
+          <div class="hb-title">⚠️ Exam Point</div>
+          <p style="color:var(--text-dim)">ECG cannot reliably differentiate LVH vs LVE. Echocardiography is required — shows increased LV internal diameter and assesses ejection fraction.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li>Treat underlying cause (valve repair, antihypertensives, cardiomyopathy management)</li>
+            <li>ACE inhibitors/ARBs, Beta-blockers, Diuretics</li>
+            <li>Advanced: ICD/CRT in severe cases, Heart failure protocols</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+        <div class="sub-label">LVH vs LVE</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>LVH</th><th>LVE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Main change</td><td>Wall thickening</td><td>Chamber dilation</td></tr>
+            <tr><td>Cause</td><td>Pressure overload</td><td>Volume overload</td></tr>
+            <tr><td>ECG</td><td>High voltage + strain</td><td>Similar (overlaps)</td></tr>
+            <tr><td>Echo</td><td>Thick walls</td><td>Dilated cavity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 4: RVH ===== -->
+  <section class="section" id="rvh">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Right Ventricular Hypertrophy (RVH)</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">💙</div>
+        <div class="topic-title">RVH — Definition, Causes, ECG, Treatment & Significance</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Thickening of the right ventricular myocardium due to chronic pressure overload on the right ventricle.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Pressure overload (most common):</strong> Pulmonary hypertension ⭐, Pulmonary stenosis, Cor pulmonale</li>
+            <li><strong>Congenital:</strong> Tetralogy of Fallot, VSD (late), ASD</li>
+            <li><strong>Other:</strong> Tricuspid valve disease, Chronic PE</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features (Very Important)</div>
+          <ul class="info-list">
+            <li><strong>1. Right Axis Deviation (RAD):</strong> QRS axis &gt; +90° (key feature)</li>
+            <li><strong>2. Dominant R in V1:</strong> R/S &gt; 1; Tall R &gt; 7 mm</li>
+            <li><strong>3. Deep S in V5, V6</strong></li>
+            <li><strong>4. RV strain pattern:</strong> ST depression & T inversion in V1–V3, inferior leads</li>
+            <li><strong>5. P pulmonale:</strong> Peaked P &gt; 2.5 mm in Lead II</li>
+            <li><strong>6. QRS:</strong> Normal or incomplete/complete RBBB</li>
+            <li><strong>7. qR pattern in V1</strong> (severe RVH)</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Summary Classic Pattern</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0">
+            <span class="tag red">Right axis deviation</span>
+            <span class="tag red">Tall R in V1</span>
+            <span class="tag red">Deep S in V6</span>
+            <span class="tag red">RV strain pattern</span>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li>Pulmonary hypertension → Vasodilators, Oxygen</li>
+            <li>Lung disease → Bronchodilators, Steroids</li>
+            <li>Pulmonary stenosis → Balloon valvuloplasty/surgery</li>
+            <li>Diuretics, Anticoagulants (PE risk)</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+        <div class="sub-label">LVH vs RVH Quick Comparison</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>LVH</th><th>RVH</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Axis</td><td>Left axis deviation</td><td>Right axis deviation</td></tr>
+            <tr><td>V1</td><td>Deep S</td><td>Tall R</td></tr>
+            <tr><td>V6</td><td>Tall R</td><td>Deep S</td></tr>
+            <tr><td>Strain leads</td><td>Lateral (I, aVL, V5, V6)</td><td>V1–V3 + Inferior</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 5: RVE ===== -->
+  <section class="section" id="rve">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Right Ventricular Enlargement (RVE)</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">🔵</div>
+        <div class="topic-title">RVE — Definition, Causes, ECG, Treatment & Significance</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Dilatation of the right ventricular cavity due to chronic volume or pressure overload. May occur with or without hypertrophy.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Volume overload:</strong> ASD ⭐, Tricuspid regurgitation, Pulmonary regurgitation</li>
+            <li><strong>Pressure overload:</strong> Pulmonary hypertension, Pulmonary stenosis, Cor pulmonale</li>
+            <li><strong>Other:</strong> Chronic PE, RV infarction, Congenital heart disease</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>1. Right Axis Deviation (RAD)</strong></li>
+            <li><strong>2. R/S &gt; 1 in V1</strong>; R/S &lt; 1 in V6</li>
+            <li><strong>3. Dominant R in V1</strong> (&gt;7 mm)</li>
+            <li><strong>4. Deep S in V5, V6</strong></li>
+            <li><strong>5. RV strain:</strong> ST depression & T inversion in V1–V3, inferior leads</li>
+            <li><strong>6. P pulmonale</strong> (associated RAE)</li>
+            <li><strong>7. Incomplete/complete RBBB</strong> — rSR′ in V1</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li>ASD → Device closure or surgery</li>
+            <li>Tricuspid regurgitation → Valve repair</li>
+            <li>Pulmonary hypertension → Vasodilators</li>
+            <li>Diuretics, Oxygen therapy, Anticoagulants</li>
+          </ul>
+        </div>
+
+        <div class="divider"></div>
+        <div class="sub-label">RVH vs RVE</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>RVH</th><th>RVE</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Main change</td><td>Wall thickening</td><td>Chamber dilation</td></tr>
+            <tr><td>Cause</td><td>Pressure overload</td><td>Volume overload</td></tr>
+            <tr><td>Echo</td><td>Thick RV wall</td><td>Dilated RV cavity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 6: AV BLOCKS ===== -->
+  <section class="section" id="avblock">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Atrioventricular (AV) Blocks</h2>
+    </div>
+
+    <!-- Overview -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">⚡</div>
+        <div class="topic-title">AV Blocks — Overview, Definition & Causes</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">AV block is delay or complete interruption of impulse conduction from atria to ventricles, usually at the AV node or His–Purkinje system.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Physiological:</strong> Increased vagal tone (athletes, sleep)</li>
+            <li><strong>Cardiac:</strong> Ischemic heart disease/MI ⭐, Degenerative conduction disease, Myocarditis, Cardiomyopathy</li>
+            <li><strong>Drug-induced:</strong> Beta-blockers, Calcium channel blockers (verapamil), Digoxin</li>
+            <li><strong>Metabolic:</strong> Hyperkalemia, Hypothyroidism</li>
+            <li><strong>Congenital:</strong> Congenital AV block, Structural defects</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1st degree -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">1°</div>
+        <div class="topic-title">First-Degree AV Block</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Delayed conduction through AV node but <strong>all impulses are conducted</strong> — no missed beats.</p>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>PR interval &gt; 200 ms (0.20 sec)</strong> — prolonged and constant</li>
+            <li>Every P wave followed by a QRS (1:1 conduction)</li>
+            <li>Regular rhythm; Normal QRS; Normal P waves</li>
+          </ul>
+          <div class="highlight-box" style="margin-top:10px">
+            <div class="hb-title">Classic Pattern</div>
+            <p style="color:var(--text-dim)">"Prolonged, constant PR interval with no dropped QRS complexes"</p>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Usually no treatment required</strong> — often benign and asymptomatic</li>
+            <li>Stop/adjust causative drugs (beta-blockers, digoxin)</li>
+            <li>Correct electrolyte imbalance; Treat ischemia</li>
+            <li>Pacemaker rarely required</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li>Common in athletes (high vagal tone) and elderly</li>
+            <li>Early sign of conduction system disease; may progress (rare)</li>
+            <li>Often incidental finding on ECG</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2nd degree -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">2°</div>
+        <div class="topic-title">Second-Degree AV Block</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Some atrial impulses fail to conduct to the ventricles, resulting in intermittent <strong>dropped QRS complexes</strong>.</p>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-label">Mobitz Type I (Wenckebach) — ECG Features</div>
+          <div class="ecg-box">
+            <div class="box-title">⚡ Type I ECG</div>
+            <ul class="info-list">
+              <li><strong>Progressive PR prolongation</strong> with each beat</li>
+              <li><strong>Dropped QRS</strong> — P wave not followed by QRS</li>
+              <li>Cycle repeats (grouped beating), Irregular rhythm</li>
+              <li>QRS usually <strong>normal</strong> (block at AV node)</li>
+            </ul>
+            <div class="highlight-box" style="margin-top:10px">
+              <div class="hb-title">Classic Pattern</div>
+              <p style="color:var(--text-dim)">"Longer, longer, longer… drop!"</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="sub-label">Mobitz Type II — ECG Features</div>
+          <div class="ecg-box">
+            <div class="box-title">⚡ Type II ECG</div>
+            <ul class="info-list">
+              <li><strong>Constant PR interval</strong> (fixed, no warning)</li>
+              <li><strong>Sudden dropped QRS</strong> — without prior prolongation</li>
+              <li>Fixed ratios possible (2:1, 3:1 block)</li>
+              <li>QRS often <strong>wide</strong> (His–Purkinje disease)</li>
+            </ul>
+            <div class="highlight-box" style="margin-top:10px">
+              <div class="hb-title">Classic Pattern</div>
+              <p style="color:var(--text-dim)">"Normal PR… suddenly drop QRS"</p>
+            </div>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>Mobitz I</th><th>Mobitz II</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>PR Interval</td><td>Progressive ↑</td><td>Constant</td></tr>
+            <tr><td>Dropped QRS</td><td>Predictable</td><td>Sudden</td></tr>
+            <tr><td>Site of block</td><td>AV node</td><td>His–Purkinje</td></tr>
+            <tr><td>QRS width</td><td>Normal</td><td>Often wide</td></tr>
+            <tr><td>Severity</td><td>Usually benign</td><td>Dangerous ⭐</td></tr>
+          </tbody>
+        </table>
+
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Mobitz I:</strong> Usually no treatment; Atropine if symptomatic</li>
+            <li><strong>Mobitz II ⭐:</strong> Permanent pacemaker; Temporary pacing if unstable</li>
+            <li>Stop causative drugs; Correct electrolytes; Treat ischemia</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li><strong>Mobitz I:</strong> Benign; seen in increased vagal tone, inferior MI</li>
+            <li><strong>Mobitz II ⭐:</strong> High risk of progression to 3rd-degree block; syncope; sudden cardiac death</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3rd degree -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">3°</div>
+        <div class="topic-title">Third-Degree AV Block (Complete Heart Block)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Complete failure of conduction between atria and ventricles — no atrial impulses reach ventricles. Atria and ventricles beat <strong>independently (AV dissociation)</strong>.</p>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>AV Dissociation ⭐:</strong> P waves and QRS complexes have no relationship</li>
+            <li>Regular P–P; Atrial rate normal (60–100/min)</li>
+            <li>Regular R–R (escape rhythm); Ventricular rate very slow (20–40/min)</li>
+            <li><strong>Variable PR interval</strong> (no fixed PR)</li>
+            <li><strong>Narrow QRS</strong> → junctional escape (better prognosis)</li>
+            <li><strong>Wide QRS</strong> → ventricular escape (worse prognosis)</li>
+            <li>More P waves than QRS complexes</li>
+          </ul>
+          <div class="highlight-box" style="margin-top:10px">
+            <div class="hb-title">Classic Pattern</div>
+            <p style="color:var(--text-dim)">"P waves marching through independently of QRS"</p>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Emergency:</strong> Temporary pacing (transcutaneous/transvenous); Atropine (limited)</li>
+            <li><strong>Definitive:</strong> Permanent pacemaker (treatment of choice)</li>
+            <li>Treat underlying cause: MI reperfusion, Stop drugs, Correct electrolytes</li>
+          </ul>
+        </div>
+        <div class="highlight-box">
+          <div class="hb-title">🚨 Life-Threatening Condition</div>
+          <p style="color:var(--text-dim)">Causes severe bradycardia, reduced cardiac output. Symptoms: Stokes-Adams attacks (syncope), Dizziness, Fatigue, Heart failure. Always requires pacemaker.</p>
+        </div>
+        <table class="data-table" style="margin-top:1rem">
+          <thead>
+            <tr><th>Feature</th><th>Finding</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Conduction</td><td>Completely blocked</td></tr>
+            <tr><td>Atria vs Ventricles</td><td>Independent</td></tr>
+            <tr><td>PR interval</td><td>Variable</td></tr>
+            <tr><td>Ventricular rate</td><td>Very slow (20–40/min)</td></tr>
+            <tr><td>Treatment</td><td>Pacemaker</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- AV Block Summary -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">📊</div>
+        <div class="topic-title">AV Block Summary Table</div>
+      </div>
+      <div class="topic-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Type</th><th>PR Interval</th><th>QRS Dropped</th><th>Rhythm</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1st Degree</td><td>Prolonged (&gt;200ms)</td><td>No</td><td>Regular</td></tr>
+            <tr><td>Mobitz I</td><td>Progressive ↑</td><td>Yes (predictable)</td><td>Irregular</td></tr>
+            <tr><td>Mobitz II</td><td>Constant</td><td>Yes (sudden)</td><td>Irregular</td></tr>
+            <tr><td>3rd Degree</td><td>No relation</td><td>Complete block</td><td>Independent</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 7: BUNDLE BRANCH BLOCKS ===== -->
+  <section class="section" id="bbb">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Bundle Branch Blocks (BBB)</h2>
+    </div>
+
+    <!-- RBBB -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">→</div>
+        <div class="topic-title">Right Bundle Branch Block (RBBB)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Conduction through the right bundle branch is delayed or blocked — right ventricle depolarizes <strong>later</strong> than the left.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li>Right ventricular hypertrophy</li>
+            <li>Pulmonary embolism ⭐</li>
+            <li>Chronic lung disease (cor pulmonale)</li>
+            <li>Congenital heart disease (e.g., ASD)</li>
+            <li>Ischemic heart disease; Can be normal variant</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>QRS ≥ 120 ms</strong></li>
+            <li><strong>rsR′ pattern in V1</strong> — "M-shaped" / "rabbit ears"</li>
+            <li><strong>Wide S wave</strong> in lateral leads (I, V5, V6)</li>
+            <li>T wave inversion in V1–V3</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment & Significance</div>
+          <ul class="info-list">
+            <li>Usually no specific treatment; Treat underlying cause</li>
+            <li>Often benign; May indicate right heart or pulmonary disease</li>
+            <li><strong>New RBBB in chest pain → suspect pulmonary embolism</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- LBBB -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">←</div>
+        <div class="topic-title">Left Bundle Branch Block (LBBB)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Conduction through the left bundle branch is blocked — delayed depolarization of the left ventricle.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li>Hypertension ⭐</li>
+            <li>Ischemic heart disease</li>
+            <li>Aortic stenosis</li>
+            <li>Cardiomyopathy</li>
+            <li>Degenerative conduction disease</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features</div>
+          <ul class="info-list">
+            <li><strong>QRS ≥ 120 ms</strong></li>
+            <li><strong>Broad, notched R waves</strong> in I, aVL, V5, V6 ("M-shaped" in lateral)</li>
+            <li><strong>No Q waves</strong> in lateral leads</li>
+            <li><strong>Deep S / "W-shaped" in V1</strong></li>
+            <li>ST depression + T inversion in lateral leads (discordant)</li>
+          </ul>
+        </div>
+        <div class="highlight-box">
+          <div class="hb-title">⭐ Always Pathological</div>
+          <p style="color:var(--text-dim)">LBBB indicates structural heart disease. Makes MI diagnosis difficult on ECG. Associated with poor prognosis and heart failure.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li>Treat underlying cause</li>
+            <li>CRT (cardiac resynchronization) in heart failure</li>
+            <li>Pacemaker in severe conduction disease</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hemiblock -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">½</div>
+        <div class="topic-title">Hemibundle Branch Block (Fascicular Block)</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Block of one fascicle of the left bundle branch: Left anterior fascicle or Left posterior fascicle.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li>Ischemic heart disease</li>
+            <li>Hypertension</li>
+            <li>Degenerative fibrosis</li>
+            <li>Cardiomyopathy</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ LAFB ECG Features</div>
+          <ul class="info-list">
+            <li><strong>Left axis deviation (−45° to −90°)</strong></li>
+            <li>Small Q in I, aVL</li>
+            <li>Small R in II, III, aVF</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ LPFB ECG Features</div>
+          <ul class="info-list">
+            <li><strong>Right axis deviation (&gt; +90°)</strong></li>
+            <li>Small R in I, aVL</li>
+            <li>Small Q in II, III, aVF</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Clinical Significance</div>
+          <ul class="info-list">
+            <li>May be isolated or combined with other blocks</li>
+            <li>Can progress to complete heart block</li>
+            <li>QRS duration usually normal or slightly prolonged</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- BBB Summary -->
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">📊</div>
+        <div class="topic-title">BBB Summary Table</div>
+      </div>
+      <div class="topic-body">
+        <table class="data-table">
+          <thead>
+            <tr><th>Feature</th><th>RBBB</th><th>LBBB</th><th>Hemiblock</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>QRS duration</td><td>≥120 ms</td><td>≥120 ms</td><td>Normal/slightly ↑</td></tr>
+            <tr><td>V1 pattern</td><td>rsR′ (M shape)</td><td>Deep S (W shape)</td><td>No classic pattern</td></tr>
+            <tr><td>V6 pattern</td><td>Wide S</td><td>Broad R</td><td>Axis deviation</td></tr>
+            <tr><td>Axis</td><td>Normal/right</td><td>Left</td><td>LAD or RAD</td></tr>
+            <tr><td>Significance</td><td>Often benign</td><td>Always pathological</td><td>Variable</td></tr>
+          </tbody>
+        </table>
+        <div class="warning-box" style="margin-top:1rem">
+          <div class="hb-title">⭐ Exam Memory Trick</div>
+          <p style="color:var(--text-dim)">RBBB → <strong>"M in V1, W in V6"</strong> &nbsp;|&nbsp; LBBB → <strong>"W in V1, M in V6"</strong> &nbsp;|&nbsp; LAFB → Left axis &nbsp;|&nbsp; LPFB → Right axis</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 8: ELECTROLYTES ===== -->
+  <section class="section" id="electrolytes">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">Electrolyte Imbalance</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">⚗️</div>
+        <div class="topic-title">Electrolyte Imbalance — Overview</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Abnormal levels of electrolytes in the blood (mainly K⁺, Ca²⁺, Mg²⁺, Na⁺) that affect cardiac electrical activity, producing characteristic ECG changes.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li><strong>Renal:</strong> CKD, Renal failure</li>
+            <li><strong>Drug-induced:</strong> Diuretics, ACE inhibitors, Digoxin</li>
+            <li><strong>GI loss:</strong> Vomiting, Diarrhea</li>
+            <li><strong>Endocrine:</strong> Hyperaldosteronism, Hypoparathyroidism</li>
+            <li><strong>Other:</strong> Dehydration, Severe illness, Burns</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">K⁺</div>
+        <div class="topic-title">Potassium Imbalance ⭐ (Most Important)</div>
+      </div>
+      <div class="topic-body">
+        <div class="ecg-box">
+          <div class="box-title">⚡ HYPERKALEMIA (↑ K⁺) — ECG (Progressive)</div>
+          <ul class="info-list">
+            <li><strong>Tall, peaked T waves</strong> ("tent-shaped") — earliest sign</li>
+            <li>Flattened or absent P waves</li>
+            <li>Wide QRS complex</li>
+            <li>Sine wave pattern (severe)</li>
+            <li>Ventricular arrhythmias / cardiac arrest</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ HYPOKALEMIA (↓ K⁺) — ECG</div>
+          <ul class="info-list">
+            <li>Flattened T waves</li>
+            <li><strong>Prominent U waves ⭐</strong> (classic sign)</li>
+            <li>ST depression</li>
+            <li>Prolonged QT interval (apparent)</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Hyperkalemia (Emergency):</strong> Calcium gluconate (stabilize), Insulin + glucose (shift K⁺ in), Diuretics/Dialysis</li>
+            <li><strong>Hypokalemia:</strong> K⁺ replacement (oral/IV)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">Ca²⁺</div>
+        <div class="topic-title">Calcium & Magnesium Imbalance</div>
+      </div>
+      <div class="topic-body">
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Changes</div>
+          <ul class="info-list">
+            <li><strong>Hypercalcemia (↑ Ca²⁺):</strong> Short QT interval</li>
+            <li><strong>Hypocalcemia (↓ Ca²⁺):</strong> Prolonged QT interval</li>
+            <li><strong>Hypomagnesemia:</strong> Prolonged QT; Risk of torsades de pointes</li>
+            <li><strong>Hypermagnesemia:</strong> Bradycardia; Prolonged PR and QRS</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li><strong>Hypercalcemia:</strong> IV fluids, Diuretics, Bisphosphonates</li>
+            <li><strong>Hypocalcemia:</strong> Calcium supplementation</li>
+            <li><strong>Low Mg:</strong> Mg replacement; <strong>High Mg:</strong> Stop Mg intake</li>
+          </ul>
+        </div>
+        <table class="data-table" style="margin-top:1rem">
+          <thead>
+            <tr><th>Electrolyte</th><th>ECG Change</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>↑ K⁺</td><td>Peaked T waves, wide QRS</td></tr>
+            <tr><td>↓ K⁺</td><td>U wave, flat T wave</td></tr>
+            <tr><td>↑ Ca²⁺</td><td>Short QT</td></tr>
+            <tr><td>↓ Ca²⁺</td><td>Long QT</td></tr>
+            <tr><td>↓ Mg²⁺</td><td>Torsades de pointes risk</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 9: METABOLIC ===== -->
+  <section class="section" id="metabolic">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2 class="section-title">Metabolic Abnormalities</h2>
+    </div>
+
+    <div class="topic-card">
+      <div class="topic-header">
+        <div class="topic-icon">🧪</div>
+        <div class="topic-title">Metabolic Abnormalities — ECG Changes</div>
+      </div>
+      <div class="topic-body">
+        <div class="subsection">
+          <div class="sub-label">Definition</div>
+          <p class="sub-content">Disturbances in the body's biochemical processes (acid–base, hormones, temperature, glucose) that affect cardiac electrophysiology and produce characteristic ECG changes.</p>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Causes</div>
+          <ul class="info-list">
+            <li>Metabolic acidosis/alkalosis</li>
+            <li>Hypothyroidism / Hyperthyroidism</li>
+            <li>Hypothermia / Hyperthermia</li>
+            <li>Hypoglycemia / Hyperglycemia</li>
+            <li>Sepsis, Liver failure, Renal failure</li>
+          </ul>
+        </div>
+        <div class="ecg-box">
+          <div class="box-title">⚡ ECG Features by Condition</div>
+          <ul class="info-list">
+            <li><strong>Metabolic acidosis:</strong> Tachycardia; Hyperkalemia-like changes (peaked T, wide QRS)</li>
+            <li><strong>Metabolic alkalosis:</strong> Hypokalemia-like (flat T, U waves, arrhythmias)</li>
+            <li><strong>Hypothyroidism:</strong> Sinus bradycardia; Low voltage QRS; Prolonged QT; Flat/inverted T</li>
+            <li><strong>Hyperthyroidism:</strong> Sinus tachycardia ⭐; Atrial fibrillation; Increased QRS voltage</li>
+            <li><strong>Hypothermia:</strong> <em>Osborn (J) wave ⭐ (pathognomonic)</em>; Bradycardia; Prolonged PR, QRS, QT</li>
+            <li><strong>Hyperthermia:</strong> Sinus tachycardia; Arrhythmias</li>
+            <li><strong>Hypoglycemia:</strong> Prolonged QT; Risk of arrhythmias</li>
+            <li><strong>Sepsis/Systemic illness:</strong> Sinus tachycardia; Non-specific ST-T changes</li>
+          </ul>
+        </div>
+        <div class="subsection">
+          <div class="sub-label">Treatment</div>
+          <ul class="info-list">
+            <li>Treat underlying cause (correct acid-base, manage endocrine disorder)</li>
+            <li>Normalize body temperature; Control glucose</li>
+            <li>Hypothyroidism → Thyroxine; Hyperthyroidism → Antithyroid drugs</li>
+            <li>Hypothermia → Gradual rewarming</li>
+            <li>Supportive: IV fluids, Oxygen, ECG monitoring</li>
+          </ul>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Condition</th><th>ECG Change</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Acidosis</td><td>Hyperkalemia-like changes</td></tr>
+            <tr><td>Alkalosis</td><td>Hypokalemia-like changes</td></tr>
+            <tr><td>Hypothyroidism</td><td>Bradycardia, low voltage</td></tr>
+            <tr><td>Hyperthyroidism</td><td>Tachycardia, AF</td></tr>
+            <tr><td>Hypothermia</td><td>Osborn (J) wave ⭐</td></tr>
+            <tr><td>Hypoglycemia</td><td>Long QT</td></tr>
+          </tbody>
+        </table>
+        <div class="warning-box" style="margin-top:1rem">
+          <div class="hb-title">⭐ Classic Viva Tricks</div>
+          <p style="color:var(--text-dim)">Osborn wave → Hypothermia &nbsp;|&nbsp; AF → think Hyperthyroidism &nbsp;|&nbsp; Acid–base disorders mimic potassium changes</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SECTION 10: SHORT Q&A ===== -->
+  <section class="section" id="shortqa">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2 class="section-title">Very Short Answer Q&A (2 Marks)</h2>
+    </div>
+
+    <div class="qa-grid">
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.28</span><div class="qa-question">State the normal duration and amplitude of the QRS complex.</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Duration:</strong> 0.06–0.10 sec (≤ 100 ms). <strong>Amplitude:</strong> 5–30 mm (varies with leads). Represents ventricular depolarization.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.29</span><div class="qa-question">List ECG features of ventricular tachycardia.</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Wide QRS complex</strong> (&gt;120 ms); Rate 100–250 bpm; AV dissociation; Fusion and capture beats; Regular rhythm.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.30</span><div class="qa-question">Define PR interval and state its normal duration.</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Definition:</strong> Time from start of P wave to start of QRS complex; represents atrial depolarization + AV conduction. <strong>Normal:</strong> 0.12–0.20 sec.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.31</span><div class="qa-question">List methods of estimating heart rate from ECG.</div></div>
+        <div class="qa-a"><div class="qa-answer">
+          <ul class="info-list">
+            <li><strong>300 rule:</strong> 300 ÷ large squares between R–R</li>
+            <li><strong>1500 rule:</strong> 1500 ÷ small squares between R–R</li>
+            <li><strong>6-second method:</strong> Count QRS in 6 sec × 10</li>
+            <li><strong>10-second method:</strong> Count beats × 6</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.32</span><div class="qa-question">What is the pacemaker potential of the SA node?</div></div>
+        <div class="qa-a"><div class="qa-answer">Slow spontaneous depolarization during <strong>phase 4</strong> due to inward Na⁺ and Ca²⁺ currents. Responsible for automaticity of the SA node.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.33</span><div class="qa-question">What is the classic ECG feature of atrial flutter?</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Saw-tooth (F waves) ⭐</strong> — best seen in leads II, III, aVF. Atrial rate ~250–350 bpm.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.34</span><div class="qa-question">Explain the significance of pathological Q waves.</div></div>
+        <div class="qa-a"><div class="qa-answer">Indicates <strong>myocardial infarction</strong> (old or acute) and represents myocardial necrosis. Criteria: Width &gt; 0.04 sec; Depth &gt; 25% of R wave amplitude.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.35</span><div class="qa-question">List ECG features of anterior wall myocardial infarction.</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>ST elevation in V1–V4 ⭐</strong>; Pathological Q waves in anterior leads; T wave inversion. Indicates LAD artery involvement.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.36</span><div class="qa-question">Define the AV node.</div></div>
+        <div class="qa-a"><div class="qa-answer">A specialized conduction tissue located in the <strong>interatrial septum near the tricuspid valve</strong>. Delays impulse transmission before passing to the ventricles.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.37</span><div class="qa-question">What is a premature ventricular contraction (PVC)?</div></div>
+        <div class="qa-a"><div class="qa-answer">Early ventricular beat arising from an ectopic focus. Features: <strong>Wide QRS</strong>; No preceding P wave; Compensatory pause.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.38</span><div class="qa-question">What is the ECG feature of dextrocardia?</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Inverted P and QRS in Lead I</strong>; Right axis deviation; Poor R wave progression in chest leads.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.39</span><div class="qa-question">List ECG criteria for left ventricular hypertrophy (LVH).</div></div>
+        <div class="qa-a"><div class="qa-answer">
+          <ul class="info-list">
+            <li>High QRS voltage (Sokolow–Lyon: S(V1) + R(V5/V6) ≥ 35 mm)</li>
+            <li>Left axis deviation</li>
+            <li>Strain pattern (ST depression, T inversion in lateral leads)</li>
+            <li>Tall R in V5/V6; Deep S in V1</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.40</span><div class="qa-question">Define significant ST elevation and ST depression.</div></div>
+        <div class="qa-a"><div class="qa-answer">
+          <strong>ST Elevation:</strong> ≥ 1 mm in limb leads; ≥ 2 mm in chest leads.<br>
+          <strong>ST Depression:</strong> ≥ 0.5 mm horizontal or downsloping.
+        </div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.41</span><div class="qa-question">What is a hemifascicular block?</div></div>
+        <div class="qa-a"><div class="qa-answer">Block of one fascicle of the left bundle branch. Types: <strong>Left Anterior Fascicular Block (LAFB)</strong> and <strong>Left Posterior Fascicular Block (LPFB)</strong>.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.42</span><div class="qa-question">State the normal amplitude and duration of T wave.</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>Duration:</strong> ~0.10–0.25 sec. <strong>Amplitude:</strong> &lt;5 mm in limb leads; &lt;10 mm in chest leads.</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.43</span><div class="qa-question">What is the Sokolow–Lyon criteria for LVH?</div></div>
+        <div class="qa-a"><div class="qa-answer"><div class="formula">S(V1) + R(V5/V6) ≥ 35 mm</div><br>If this voltage criterion is met, LVH is diagnosed. Confirm with echocardiography (gold standard).</div></div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q"><span class="qa-num">Q.44</span><div class="qa-question">What is false negative TMT?</div></div>
+        <div class="qa-a"><div class="qa-answer"><strong>TMT (Treadmill Test) is normal despite presence of coronary artery disease.</strong> Causes: Inadequate exercise achieved; Single-vessel disease; Medications (beta-blockers blunting heart rate response).</div></div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+  // Scroll to top button
+  window.addEventListener('scroll', () => {
+    document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 400);
+  });
+
+  // Intersection Observer for section animations
+  const sections = document.querySelectorAll('.section');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.08 });
+  sections.forEach(s => observer.observe(s));
+
+  // Active nav link on scroll
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sectionEls = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sectionEls.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    navLinks.forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>
